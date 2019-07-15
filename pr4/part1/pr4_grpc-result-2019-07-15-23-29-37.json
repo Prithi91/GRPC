@@ -1,0 +1,101 @@
+{
+    "tests": [
+        {
+            "output": {
+                "client_returncode": 0,
+                "client_err_console": null,
+                "passfail": "passed",
+                "client_console": "g++ -Wall -g3 -fPIC proto-src/dfs-service.grpc.pb.cc -c `pkg-config --cflags protobuf grpc` -o tmp/dfs-service.grpc.pb.o\ng++ -Wall -g3 -fPIC proto-src/dfs-service.pb.cc -c `pkg-config --cflags protobuf grpc` -o tmp/dfs-service.pb.o\ng++ -Wall -g3 -fPIC src/dfs-clientnode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfs-clientnode-p1.o\ng++ -Wall -g3 -fPIC src/dfs-client-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfs-client-p1.o\nmake: Warning: File 'dfslib-clientnode-p1.cpp' has modification time 8541 s in the future\ng++ -Wall -g3 -fPIC dfslib-clientnode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-clientnode-p1.o\ng++ -Wall -g3 -fPIC dfslib-shared-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-shared-p1.o\ng++ -Wall -g3 -fPIC dfslib-servernode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-servernode-p1.o\ng++ -Wall -g3 -fPIC tmp/dfs-service.grpc.pb.o tmp/dfs-service.pb.o tmp/dfs-clientnode-p1.o tmp/dfs-client-p1.o tmp/dfslib-clientnode-p1.o tmp/dfslib-shared-p1.o tmp/dfslib-servernode-p1.o src/bvt_client.cpp `pkg-config --cflags protobuf grpc` -fsanitize=address -fno-omit-frame-pointer -DDFS_MAIN -L/usr/local/lib `pkg-config --libs protobuf grpc++ grpc` -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl -static-libasan -o bvt_client\nmake: warning:  Clock skew detected.  Your build may be incomplete.\n"
+            },
+            "traceback": "",
+            "description": "Tests that the client compiles"
+        },
+        {
+            "output": {
+                "server_console": "make: Warning: File 'dfslib-clientnode-p1.cpp' has modification time 8527 s in the future\ng++ -Wall -g3 -fPIC dfslib-clientnode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-clientnode-p1.o\ng++ -Wall -g3 -fPIC dfslib-servernode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-servernode-p1.o\ng++ -Wall -g3 -fPIC tmp/dfs-service.grpc.pb.o tmp/dfs-service.pb.o tmp/dfs-clientnode-p1.o tmp/dfslib-clientnode-p1.o tmp/dfslib-shared-p1.o tmp/dfslib-servernode-p1.o src/bvt_server.cpp `pkg-config --cflags protobuf grpc` -fsanitize=address -fno-omit-frame-pointer -DDFS_MAIN -L/usr/local/lib `pkg-config --libs protobuf grpc++ grpc` -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl -static-libasan -o bvt_server\nmake: warning:  Clock skew detected.  Your build may be incomplete.\n",
+                "passfail": "passed",
+                "server_returncode": 0,
+                "server_err_console": null
+            },
+            "traceback": "",
+            "description": "Tests that the server compiles"
+        },
+        {
+            "output": {
+                "client_returncode": 1,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that the client handles an exceeded deadline correctly."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that the client and server agree on the file listing."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that a file not found is properly handled."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that fetching a large file works."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that storing a large file to the server works."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that fetching a small file works."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that storing a small file to the server works."
+        }
+    ]
+}

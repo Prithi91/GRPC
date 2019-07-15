@@ -1,0 +1,101 @@
+{
+    "tests": [
+        {
+            "output": {
+                "client_returncode": 1,
+                "server_console": "-S: DFSServerNode server listening on 0.0.0.0:42001\nFetch calledgt-data10.jpgFile pathmnt/bvt_server/gt-data10.jpg\nfile size13182786",
+                "passfail": "failed",
+                "server_returncode": null,
+                "client_console": "0\n!E: The fetched file does not match the server. 0 != 61d0d68a\n"
+            },
+            "traceback": "Traceback (most recent call last):\n  File \"/home/grader/pr4_grpc/gios.py\", line 293, in func_wrapper\n    ans = func(self)\n  File \"run.py\", line 246, in test_large_fetch\n    self.go('fetch', 'OK', self.get_random_file('large'))\n  File \"run.py\", line 230, in go\n    self.converse(server_args, client_args, **kwargs)\n  File \"run.py\", line 204, in converse\n    self.assertEqual(self.p_client.poll(), 0, \"The client exited abnormally.\")\nAssertionError: The client exited abnormally.\n",
+            "description": "Tests that fetching a large file works."
+        },
+        {
+            "output": {
+                "client_returncode": 1,
+                "server_console": "-S: DFSServerNode server listening on 0.0.0.0:42001\nFile already exists\n",
+                "passfail": "failed",
+                "server_returncode": null,
+                "client_console": "File pathmnt/bvt_client/gt-data12.jpg\nfile size184205766\n!E: Expected status code: \"OK, received: ALREADY_EXISTS\n"
+            },
+            "traceback": "Traceback (most recent call last):\n  File \"/home/grader/pr4_grpc/gios.py\", line 293, in func_wrapper\n    ans = func(self)\n  File \"run.py\", line 261, in test_large_store\n    self.go('store', 'OK', self.get_random_file('large'))\n  File \"run.py\", line 230, in go\n    self.converse(server_args, client_args, **kwargs)\n  File \"run.py\", line 204, in converse\n    self.assertEqual(self.p_client.poll(), 0, \"The client exited abnormally.\")\nAssertionError: The client exited abnormally.\n",
+            "description": "Tests that storing a large file to the server works."
+        },
+        {
+            "output": {
+                "client_returncode": 1,
+                "server_console": "-S: DFSServerNode server listening on 0.0.0.0:42001\nFetch calledgt-data03.jpgFile pathmnt/bvt_server/gt-data03.jpg\nfile size40784",
+                "passfail": "failed",
+                "server_returncode": null,
+                "client_console": "0\n!E: The fetched file does not match the server. 0 != 4cf1a450\n"
+            },
+            "traceback": "Traceback (most recent call last):\n  File \"/home/grader/pr4_grpc/gios.py\", line 293, in func_wrapper\n    ans = func(self)\n  File \"run.py\", line 238, in test_small_fetch\n    self.go('fetch', 'OK', 'gt-data03.jpg')\n  File \"run.py\", line 230, in go\n    self.converse(server_args, client_args, **kwargs)\n  File \"run.py\", line 204, in converse\n    self.assertEqual(self.p_client.poll(), 0, \"The client exited abnormally.\")\nAssertionError: The client exited abnormally.\n",
+            "description": "Tests that fetching a small file works."
+        },
+        {
+            "output": {
+                "client_returncode": 1,
+                "server_console": "-S: DFSServerNode server listening on 0.0.0.0:42001\nFile already exists\n",
+                "passfail": "failed",
+                "server_returncode": null,
+                "client_console": "File pathmnt/bvt_client/gt-data03.jpg\nfile size407846\n!E: Expected status code: \"OK, received: ALREADY_EXISTS\n"
+            },
+            "traceback": "Traceback (most recent call last):\n  File \"/home/grader/pr4_grpc/gios.py\", line 293, in func_wrapper\n    ans = func(self)\n  File \"run.py\", line 253, in test_small_store\n    self.go('store', 'OK', 'gt-data03.jpg')\n  File \"run.py\", line 230, in go\n    self.converse(server_args, client_args, **kwargs)\n  File \"run.py\", line 204, in converse\n    self.assertEqual(self.p_client.poll(), 0, \"The client exited abnormally.\")\nAssertionError: The client exited abnormally.\n",
+            "description": "Tests that storing a small file to the server works."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "client_err_console": null,
+                "passfail": "passed",
+                "client_console": "g++ -Wall -g3 -fPIC proto-src/dfs-service.grpc.pb.cc -c `pkg-config --cflags protobuf grpc` -o tmp/dfs-service.grpc.pb.o\ng++ -Wall -g3 -fPIC proto-src/dfs-service.pb.cc -c `pkg-config --cflags protobuf grpc` -o tmp/dfs-service.pb.o\ng++ -Wall -g3 -fPIC src/dfs-clientnode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfs-clientnode-p1.o\ng++ -Wall -g3 -fPIC src/dfs-client-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfs-client-p1.o\nmake: Warning: File 'dfslib-clientnode-p1.cpp' has modification time 7620 s in the future\ng++ -Wall -g3 -fPIC dfslib-clientnode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-clientnode-p1.o\ng++ -Wall -g3 -fPIC dfslib-shared-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-shared-p1.o\ng++ -Wall -g3 -fPIC dfslib-servernode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-servernode-p1.o\ng++ -Wall -g3 -fPIC tmp/dfs-service.grpc.pb.o tmp/dfs-service.pb.o tmp/dfs-clientnode-p1.o tmp/dfs-client-p1.o tmp/dfslib-clientnode-p1.o tmp/dfslib-shared-p1.o tmp/dfslib-servernode-p1.o src/bvt_client.cpp `pkg-config --cflags protobuf grpc` -fsanitize=address -fno-omit-frame-pointer -DDFS_MAIN -L/usr/local/lib `pkg-config --libs protobuf grpc++ grpc` -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl -static-libasan -o bvt_client\nmake: warning:  Clock skew detected.  Your build may be incomplete.\n"
+            },
+            "traceback": "",
+            "description": "Tests that the client compiles"
+        },
+        {
+            "output": {
+                "server_console": "make: Warning: File 'dfslib-clientnode-p1.cpp' has modification time 7606 s in the future\ng++ -Wall -g3 -fPIC dfslib-clientnode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-clientnode-p1.o\ng++ -Wall -g3 -fPIC dfslib-servernode-p1.cpp -c `pkg-config --cflags protobuf grpc` -DDFS_GRADER -o tmp/dfslib-servernode-p1.o\ng++ -Wall -g3 -fPIC tmp/dfs-service.grpc.pb.o tmp/dfs-service.pb.o tmp/dfs-clientnode-p1.o tmp/dfslib-clientnode-p1.o tmp/dfslib-shared-p1.o tmp/dfslib-servernode-p1.o src/bvt_server.cpp `pkg-config --cflags protobuf grpc` -fsanitize=address -fno-omit-frame-pointer -DDFS_MAIN -L/usr/local/lib `pkg-config --libs protobuf grpc++ grpc` -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed -ldl -static-libasan -o bvt_server\nmake: warning:  Clock skew detected.  Your build may be incomplete.\n",
+                "passfail": "passed",
+                "server_returncode": 0,
+                "server_err_console": null
+            },
+            "traceback": "",
+            "description": "Tests that the server compiles"
+        },
+        {
+            "output": {
+                "client_returncode": 1,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that the client handles an exceeded deadline correctly."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that the client and server agree on the file listing."
+        },
+        {
+            "output": {
+                "client_returncode": 0,
+                "server_console": "",
+                "passfail": "passed",
+                "server_returncode": null,
+                "client_console": ""
+            },
+            "traceback": "",
+            "description": "Tests that a file not found is properly handled."
+        }
+    ]
+}

@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package dfs_service;
+
+service DFSService {
+
+    // Add your service calls here
+
+    // 1. REQUIRED (Parts 1 & 2): A method to store files on the server
+	rpc StoreFile (stream File) returns (Empty) {}
+
+    // 2. REQUIRED (Parts 1 & 2): A method to fetch files from the server
+	rpc FetchFile (request) returns (stream File) {}
+
+    // 3. REQUIRED (Parts 1 & 2): A method to list all files on the server
+	rpc ListFiles (Empty) returns (stream File) {}
+
+    // 4. REQUIRED (Parts 1 & 2): A method to get the status of a file on the server
+	rpc GetAtt (request) returns (File) {}
+
+    // 5. REQUIRED (Part 2 only): A method to request a write lock from the server
+
+    // 6. Any other methods you deem necessary to complete the tasks of this assignment
+
+
+
+}
+
+// Add your message types here
+message FileList{
+	repeated File file_list =1;
+}
+
+message File {
+	string file_name = 1;
+	int32 file_size = 2;
+	uint64 file_mtime = 3;
+	uint64 file_ctime = 4;
+	bytes file_chunk = 5;
+}
+
+message request{
+	string file_name = 2;
+}
+
+message Empty{}
+
