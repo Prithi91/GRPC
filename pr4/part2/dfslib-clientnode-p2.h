@@ -35,6 +35,9 @@ public:
      * Destructor for the DFSClientNode class
      */
     ~DFSClientNodeP2();
+	
+    //Mutex for current running thread
+     std::mutex curRunning_mutex;
 
     /**
      * Request write access to the server

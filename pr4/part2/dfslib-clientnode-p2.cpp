@@ -175,6 +175,8 @@ void DFSClientNodeP2::Sync() {
     // what type of locking/guarding is necessary to ensure the threads are
     // properly coordinated.
     //
+    this->curRunning_mutex.lock();
+    this->curRunning_mutex.unlock();
 }
 
 void DFSClientNodeP2::InotifyWatcherCallback(std::function<void()> callback) {
@@ -197,10 +199,10 @@ void DFSClientNodeP2::InotifyWatcherCallback(std::function<void()> callback) {
     // Hint: how can you prevent race conditions between this thread and
     // the synchronization timer when a file event has been signaled?
     //
-
-
+    
+    this->curRunning_mutex.lock();
     callback();
-
+    this->curRunning_mutex.unlock();
 
 }
 

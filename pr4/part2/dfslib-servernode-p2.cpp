@@ -1,3 +1,5 @@
+#define BUFSIZE 5000
+
 #include <map>
 #include <mutex>
 #include <shared_mutex>
@@ -17,6 +19,8 @@
 #include "dfslib-servernode-p2.h"
 #include "proto-src/dfs-service.grpc.pb.h"
 
+using namespace std;
+
 using grpc::Status;
 using grpc::Server;
 using grpc::StatusCode;
@@ -26,6 +30,9 @@ using grpc::ServerContext;
 using grpc::ServerBuilder;
 
 using dfs_service::DFSService;
+using dfs_service::File;
+using dfs_service::Request;
+using dfs_service::Empty;
 
 
 extern dfs_log_level_e DFS_LOG_LEVEL;
@@ -73,6 +80,9 @@ private:
 
     // CRC Table kept in memory for faster calculations
     CRC::Table<std::uint32_t, 32> crc_table;
+    //Map of locks
+    std::map<std::string,std::string>* lock_map;
+    std::mutex map_mutex;
 
 public:
 
@@ -88,8 +98,197 @@ public:
     // Add your additional code here, including
     // the implementations of your rpc protocol methods.
     //
+    void addMapPair(string filename, string clientId){
+	this->lock_map -> insert(pair<std::string,std::string>(filename,clientId));	
+    }
 
+    std::string getLockStat(string filename){
+	std::map<std::string,std::string>::iterator itr;
+	if(!this->lock_map->empty()){
+		itr = this->lock_map->find(filename);
+		if( itr != lock_map->end()) return itr->second;
+		else return NULL;
+	}
+	return NULL;
+    }
 
+    void setMapPair(string filename, string clientId){
+	std::map<std::string,std::string>::iterator itr;
+	if(!this->lock_map->empty()){
+		itr = this->lock_map->find(filename);
+		if( itr != lock_map->end()) itr->second= clientId;
+	}
+    }
+    
+    Status AcquireLock(ServerContext* context, const ::dfs_service::Request* request, ::dfs_service::Empty* response) override {
+	Status status_ok;
+	this->map_mutex.lock();
+	string lockclient = this->getLockStat(request->file_name());
+	string clientid = request->client_id();
+	if(lockclient.empty()){
+		this->addMapPair(request->file_name(), clientid);
+		this->map_mutex.unlock();
+		return status_ok;
+	}
+	else if(strcmp(lockclient.c_str(),"Free")==0){
+		this->setMapPair(request->file_name(), clientid);
+		this->map_mutex.unlock();
+		return status_ok;
+	}
+	else if(strcmp(lockclient.c_str(),clientid.c_str())==0){
+		this->map_mutex.unlock();
+		return status_ok;
+	}
+	else{
+		this->map_mutex.unlock();
+		Status failed(StatusCode::RESOURCE_EXHAUSTED,"Another client has the file lock");
+		return failed;
+	}
+    }
+
+    Status StoreFile(ServerContext* context, ServerReader< ::dfs_service::Request>* reader, ::dfs_service::Empty* response) override {
+	//const Request req_topass;
+	Request req;
+	//req_topass =&req;
+	Status status_ok;
+	int i=0;
+	fstream fout;
+	string filepath;
+	while(reader->Read(&req)){
+		if(i==0){
+			//string filename = req.file_name();
+			//string clientid = req.client_id();
+			//req_topass.set_file_name(filename);
+			//req_topass.set_client_id(clientid);
+			filepath = this->WrapPath(req.file_name());
+			Status lock_status = this->AcquireLock(context, &req, response);
+			if(lock_status.error_code()==0){
+				fout.open(filepath,ios::out|ios::binary);
+			}
+			else{
+				return lock_status;
+			}
+		}
+		fout << req.file_chunk();
+		i++;
+	}
+	fout.close();
+	this->map_mutex.lock();
+	this->setMapPair(req.file_name(), "Free");
+	this->map_mutex.unlock();
+	return status_ok;
+    }
+
+    Status FetchFile(ServerContext* context, const ::dfs_service::Request* request, ServerWriter< ::dfs_service::File>* writer) override{
+	cout<<"Fetch called"<<request->file_name();
+	//char buffer[BUFSIZE];	
+	size_t fsize, bytes_read, tobeRead;
+	File file;
+	Empty empty;
+	Status status_ok;
+	string filename = request->file_name();
+	string filepath = this->WrapPath(filename);
+	cout << "File path" << filepath << endl;
+	Status lock_status = this->AcquireLock(context, request, &empty);
+	if(lock_status.error_code()!=0) return lock_status;
+	ifstream fin;
+	//std::this_thread::sleep_for(std::chrono::milliseconds(10000));
+	fin.open(filepath,ios::in|ios::ate|ios::binary);
+	if(!fin){
+		cout<<"File not found"<<endl;
+		Status notfound(StatusCode::NOT_FOUND,"File not found");
+		return notfound;
+	}
+	file.set_file_name(filename);
+	fsize = fin.tellg();
+	cout <<"file size"<< fsize;
+	fin.seekg(0, ios::beg);
+	bytes_read=0;
+	tobeRead = fsize;
+	file.set_file_size(fsize);
+	do{
+		if(tobeRead <= BUFSIZE){
+			char buffer[tobeRead];
+			memset(buffer,0, sizeof(buffer));
+			fin.read(buffer, tobeRead);
+			bytes_read+= tobeRead;
+			//cout << "read content:" << buffer << endl;
+			file.set_file_chunk(buffer,tobeRead);
+		}
+		else{
+			char buffer[BUFSIZE];
+			memset(buffer,0, sizeof(buffer));
+			fin.read(buffer, BUFSIZE);
+			bytes_read+= BUFSIZE;
+			//cout << "read content:" << buffer << endl;
+			file.set_file_chunk(buffer,BUFSIZE);
+		}
+		//cout << "Set file content:" << file.file_chunk() << endl;
+		writer->Write(file);
+		tobeRead = fsize - bytes_read;
+	}while(tobeRead>0);
+	return status_ok;
+    }
+
+    Status ListFiles(ServerContext* context, const ::dfs_service::Empty* request, ServerWriter< ::dfs_service::File>* writer) override{
+	DIR *dir;
+	struct dirent *ent;	
+	const char *filedir = this->mount_path.c_str();
+	struct tm *time;
+	struct stat filestat;
+	Status status_ok;
+	time_t modtime;
+	if((dir = opendir (filedir)) != NULL){
+		while((ent = readdir(dir)) != NULL){
+			File file;
+			file.set_file_name(ent->d_name);
+			string filepath = this->WrapPath(ent->d_name);
+			stat(filepath.c_str(), &filestat);
+			time = gmtime(&(filestat.st_mtime));
+			modtime = mktime(time);
+			file.set_file_mtime(modtime);
+			cout<< file.file_name() << "\t" << file.file_mtime()<< endl;
+			writer->Write(file);	
+		}
+		closedir(dir);
+	}
+	else{
+		cout<<"Directory open failed"<<endl;
+		Status exists(StatusCode::CANCELLED,"Directory cannot be opened");
+		return exists;
+	}
+	return status_ok;
+    }
+
+    Status GetAtt(ServerContext* context, const ::dfs_service::Request* request, ::dfs_service::File* response) override{
+	cout<<"Stat called"<<request->file_name();
+	//File file;
+	string filename = request->file_name();
+	struct tm *time;
+	struct stat filestat;
+	size_t fsize;
+	Status status_ok;
+	time_t modtime;
+	uint32_t server_csum;
+	string filepath = this->WrapPath(request->file_name());
+	ifstream fin;
+	fin.open(filepath,ios::in|ios::ate|ios::binary);
+	if(!fin){
+		cout<<"File not found"<<endl;
+		Status notfound(StatusCode::NOT_FOUND,"File not found");
+		return notfound;
+	}
+	response->set_file_name(filename);
+	fsize = fin.tellg();
+	response->set_file_size(fsize);
+	stat(filepath.c_str(), &filestat);
+	time = gmtime(&(filestat.st_mtime));
+	modtime = mktime(time);
+	response->set_file_mtime(modtime);
+	server_csum = dfs_file_checksum(filepath, &this->crc_table);
+	response->set_file_csum(server_csum);
+	return status_ok;
+    }
 };
 
 //
