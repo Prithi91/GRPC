@@ -62,4 +62,8 @@ __Please include references to any external materials that you used in your proj
 	# Multiple clients requesting same files - simulated by running client from different terminals with different mount paths(Files should be downloaded to all clients properly)
 
 ## References
-
+https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+https://github.com/grpc/grpc/blob/master/include/grpcpp/impl/codegen/
+https://grpc.io/docs/tutorials/basic/c/
+https://www.tutorialspoint.com/cplusplus/
+https://developers.google.com/protocol-buffers/docs/cpptutorial
