@@ -131,6 +131,7 @@ public:
     //
     // You may add any additional declarations of methods or variables that you need here.
     //
+    void ListClientFiles(std::map<std::string,int>* file_map = NULL, const std::string mount_path=NULL);
 
 
 };
