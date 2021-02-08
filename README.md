@@ -14,6 +14,7 @@ The source code uses a combination of C++14, gRPC, and Protocol Buffers.
 	<li>A "FetchFile" method that takes as input a "request" message type and returns a stream of "File" message type, each instance of "File" having the subsequent chunks of the file requested from the server.<\li>
 	<li>A "ListFiles" method that returns a stream of "File" message type, representing the various files that are available in the server.<\li>
 	<li>A "GetAtt" method that takes as input a "request" message type and returns a "File" message type with the meta data of the requested file.
+<br>
 ## The DFS service uses the following message types and methods for File transfer services.
 <ul>
 	<li>A "File" message type for storing a file's meta data like File size, modified time, checksum, contents of the file in chunks.<\li>
